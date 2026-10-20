@@ -1,0 +1,8 @@
+wonderland changelog
+https://github.com/IronJoker/Wonderland
+
+22/10/2026 - v1.0.0 initial release
+  - granulizer with free mode and bpm-synced stabs (1/2 to 1/32, straight / triplet / dotted, gate)
+  - plasma visualizer synced to the grains
+  - space (plate reverb), mono-safe stereo width, mix and out
+  - 15 factory presets

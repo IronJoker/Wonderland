@@ -1,0 +1,52 @@
+name: Release
+
+# Push a tag like v1.0.0 to build macOS + Windows and publish a GitHub Release
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    uses: ./.github/workflows/build-mac.yml
+
+  win:
+    uses: ./.github/workflows/build-win.yml
+
+  publish:
+    name: Publish release
+    needs: [mac, win]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: Wonderland-mac
+          path: dist/mac
+
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: Wonderland-win
+          path: dist/win
+
+      - name: Collect release files
+        shell: bash
+        run: |
+          set -eo pipefail
+          mkdir -p release
+          find dist -name "*.zip" ! -name "*-dSYMs.zip" ! -name "*-pdbs.zip" ! -name "*-auval.zip" -exec cp {} release/ \;
+          ls -la release
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Wonderland ${{ github.ref_name }}
+          body_path: Wonderland/installer/changelog.txt
+          files: release/*.zip
