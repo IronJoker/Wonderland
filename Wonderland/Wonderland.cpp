@@ -167,6 +167,49 @@ bool Wonderland::ConstrainEditorResize(int& w, int& h) const
 }
 #endif
 
+#if defined CLAP_API
+bool Wonderland::stateSave(const clap_ostream* pStream) noexcept
+{
+  IByteChunk chunk;
+  if (!SerializeState(chunk))
+    return false;
+
+  const uint8_t* pData = chunk.GetData();
+  int64_t remaining = chunk.Size();
+  while (remaining > 0)
+  {
+    const int64_t written = pStream->write(pStream, pData, static_cast<uint64_t>(remaining));
+    if (written <= 0)
+      return false;
+    pData += written;
+    remaining -= written;
+  }
+  return true;
+}
+
+bool Wonderland::paramsValueToText(clap_id paramIdx, double value, char* display, uint32_t size) noexcept
+{
+  const IParam* pParam = GetParam(paramIdx);
+  if (!pParam)
+    return false;
+  const bool isDoubleType = pParam->Type() == IParam::kTypeDouble;
+  if (!isDoubleType)
+    value = std::round(value);
+
+  WDL_String str;
+  pParam->GetDisplay(value, isDoubleType, str);
+  if (CStringHasContents(pParam->GetLabel()))
+  {
+    str.Append(" ");
+    str.Append(pParam->GetLabel());
+  }
+  if (size <= (uint32_t) str.GetLength())
+    return false;
+  strcpy(display, str.Get());
+  return true;
+}
+#endif
+
 #if IPLUG_DSP
 void Wonderland::OnReset()
 {

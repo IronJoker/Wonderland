@@ -80,12 +80,14 @@ if %ERRORLEVEL% neq 0 (
   exit /B 1
 )
 
-echo Building ARM64EC binaries...
+REM - ARM64EC is optional: it needs the VS2022 (v143) ARM64EC tools, which newer build
+REM - machines may not have. Windows on ARM can run the x64 build under emulation.
+echo Building ARM64EC binaries (optional)...
 msbuild Wonderland.sln /t:Wonderland-app;Wonderland-vst3;Wonderland-clap /p:configuration=release /p:platform=ARM64EC /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win-arm64ec.log;errorsonly
 if %ERRORLEVEL% neq 0 (
-  echo ERROR: ARM64EC build failed
+  echo WARNING: ARM64EC build skipped, continuing with x64 only
   type build-win-arm64ec.log
-  exit /B 1
+  ver > nul
 )
 
 REM --echo Copying AAX Presets

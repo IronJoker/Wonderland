@@ -59,6 +59,13 @@ public:
 
   GrainViz mViz;
 
+#if defined CLAP_API
+  // CLAP fixes: write state in as many chunks as the host accepts, and name
+  // in-between values of choice params by their nearest choice
+  bool stateSave(const clap_ostream* pStream) noexcept override;
+  bool paramsValueToText(clap_id paramIdx, double value, char* display, uint32_t size) noexcept override;
+#endif
+
 #if IPLUG_DSP
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
   void OnReset() override;
